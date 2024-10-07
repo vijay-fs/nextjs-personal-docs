@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const { data } = useSession();
@@ -22,10 +23,10 @@ const Navbar = () => {
           <>
             <div className="flex gap-2">
               <Link className="" href="/register">
-                Register
+                <Button variant={"outline"}>Register</Button>
               </Link>
               <Link className="" href="/login">
-                Login
+                <Button variant={"default"}>Login</Button>
               </Link>
             </div>
           </>

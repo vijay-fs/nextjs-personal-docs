@@ -1,83 +1,101 @@
 "use client"
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+const formSchema = z.object({
+    name: z.string().min(2).max(50),
+    email: z.string().email(),
+    password: z.string().min(6).max(50),
+});
 
 const Register = () => {
     const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
 
-    const [values, setValues] = useState({
-        name: "",
-        email: "",
-        password: "",
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+        },
     });
-    const [error, setError] = useState<string | null>(null)
 
-    const { name, email, password } = values;
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-        setValues({ ...values, [e.target.name]: e.target.value });
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!name || !email || !password) {
-            setError("All fields are required");
-            return;
-        }
+    // Use react-hook-form's handleSubmit for form submission
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const res = await fetch("/api/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(values),
+            body: JSON.stringify(data),
         });
+
         const result = await res.json();
         if (res.ok) {
-            setValues({ name: "", email: "", password: "" });
+            form.reset(); // Clear form fields after successful submission
             router.replace("/login");
+
         } else {
             setError(result.error);
         }
     };
 
     return (
-        <form style={{ maxWidth: "576px", margin: "auto" }} onSubmit={handleSubmit}>
-            <h3 className="text-center my-5">Create an account</h3>
-            <div className="mb-3">
-                <label htmlFor="name">Name</label>
-                <input
-                    type="text"
-                    className="form-control"
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-xs sm:max-w-sm md:max-w-md w-full mx-auto px-4 mt-[10vh] h-screen ">
+                <FormField
+                    control={form.control}
                     name="name"
-                    value={name}
-                    onChange={handleChange}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Username</FormLabel>
+                            <FormControl>
+                                <Input placeholder="shadcn" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                                This is your public display name.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
-            </div>
-            <div className="mb-3">
-                <label htmlFor="email">Email</label>
-                <input
-                    type="email"
-                    className="form-control"
+                <FormField
+                    control={form.control}
                     name="email"
-                    value={email}
-                    onChange={handleChange}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input type="email" placeholder="email@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
-            </div>
-            <div className="mb-3">
-                <label htmlFor="password">Password</label>
-                <input
-                    type="password"
-                    className="form-control"
+                <FormField
+                    control={form.control}
                     name="password"
-                    value={password}
-                    onChange={handleChange}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="Password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
-            </div>
-            {error && <p className="text-danger text-center">{error}</p>}
-            <div className="mb-3 text-center">
-                <button className="btn btn-secondary btn-sm">Register</button>
-            </div>
-        </form>
+                {error && <p className="text-danger text-center">{error}</p>}
+                <Button type="submit">Register</Button>
+            </form>
+        </Form>
     );
 };
 
