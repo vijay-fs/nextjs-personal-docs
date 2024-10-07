@@ -35,3 +35,5 @@ userSchema.methods.matchPassword = async function (password) {
 };
 
 export default mongoose.models.User || mongoose.model("User", userSchema);
+
+//nextjs-personal-docs/User
