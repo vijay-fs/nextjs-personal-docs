@@ -1,12 +1,18 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 
 const Navbar = () => {
   const { data } = useSession();
   console.log(data);
+  useEffect(() => {
+    if (!data?.user) {
+      redirect("/auth");
+    }
+  }, [data?.user]);
   return (
     <nav className="flex justify-between p-4">
       <div>
@@ -16,9 +22,9 @@ const Navbar = () => {
       </div>
       <div>
         {data?.user ? (
-          <button className="btn btn-danger btn-sm" onClick={signOut}>
+          <Button variant={"outline"} onClick={signOut}>
             Logout
-          </button>
+          </Button>
         ) : (
           <>
             <div className="flex gap-2">
